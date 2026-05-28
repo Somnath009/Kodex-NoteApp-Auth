@@ -126,4 +126,44 @@ app.get("/api/notes", async (req, res) => {
 
 })
 
+/**
+ * @route PATCH /api/notes/:id
+ * @description Update a note by id require description in the request body
+ * @access Public
+ */
+
+app.patch("/api/notes/:id", async (req, res) => {
+    const { id } = req.params;
+    const { description } = req.body;
+
+    // Check if the provided ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid note ID" });
+    }
+
+    if (!description) {
+        return res.status(400).json({ error: "Description is required" });
+    }
+
+    if (description.trim().length < 10) {
+        return res.status(400).json({ error: "Description must be at least 10 characters long" });
+    }
+
+    const note = await NoteModel.findById(id);
+
+    if (!note) {
+        return res.status(404).json({ error: "Note not found" });
+    }
+
+    // Edit the note description
+    note.description = description;
+    await note.save();
+
+    // Send the success response with the updated note data
+    return res.status(200).json({
+        message: "Note updated successfully",
+        note
+    });
+})
+
 export default app;
