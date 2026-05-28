@@ -101,6 +101,29 @@ app.post("/api/notes", async (req, res) => {
     });
 })
 
+/**
+ * @route GET /api/notes
+ * @description Get all notes
+ * @access Public
+ */
+app.get("/api/notes", async (req, res) => {
 
+    // authenticate the user using the token from the cookie
+    const token = req.cookies.token;
+    const user = JSON.parse(token);
+
+    req.user = user; // { id: "user_id", email: "user_email" }
+
+    const notes = await NoteModel.find({
+        user: req.user.email
+    });
+
+    // send the success response with the notes data
+    return res.status(200).json({
+        message: "Notes fetched successfully",
+        notes
+    });
+
+})
 
 export default app;
